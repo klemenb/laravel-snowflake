@@ -37,7 +37,7 @@ class Snowflake
         $this->workerId         = Config::get('snowflake.worker_id', 1);
         $this->datacenterId     = Config::get('snowflake.datacenter_id', 1);
         $this->lastTimestamp    = $this->epoch;
-        $this->sequence         = 0;
+        $this->sequence         = $this->microseconds();
     }
 
     /**
@@ -62,10 +62,10 @@ class Snowflake
             if ($this->sequence > 4095) {
                 usleep(1);
                 $timestamp      = $this->timestamp();
-                $this->sequence = 0;
+                $this->sequence = $this->microseconds();
             }
         } else {
-            $this->sequence = 0;
+            $this->sequence = $this->microseconds();
         }
 
         $this->lastTimestamp = $timestamp;
@@ -84,5 +84,15 @@ class Snowflake
     protected function timestamp()
     {
         return round(microtime(true) * 1000);
+    }
+
+    /**
+     * Return the microsecond part of the current unixtime.
+     *
+     * @return integer
+     */
+    protected function microseconds()
+    {
+        return microtime(true) * 1000000 % 1000;
     }
 }
